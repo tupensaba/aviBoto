@@ -16,6 +16,7 @@ namespace avitoBot
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             };
             var client = new HttpClient(clientHandler);
+            client.Timeout = TimeSpan.FromSeconds(30);
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,

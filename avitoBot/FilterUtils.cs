@@ -1,4 +1,8 @@
 ﻿using System;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+
 namespace avitoBot
 {
 	public class FilterUtils
@@ -10,7 +14,7 @@ namespace avitoBot
                 try
                 {
 
-                    var _stop = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "stop.txt")).Split(',');
+                    var _stop = System.IO.File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "stop.txt")).Split(',');
 
                     Console.WriteLine(_stop);
 
@@ -27,11 +31,37 @@ namespace avitoBot
                 }
 
             }
+            
         }
 
 		public FilterUtils()
 		{
 		}
+
+        
+        public  async Task<List<string>> addStopWord(List<string> words)
+        {
+            if (System.IO.File.Exists(Path.Combine(Environment.CurrentDirectory, "stop.txt")))
+            {
+                foreach (var word in words)
+                {
+                    if (word != "." || !string.IsNullOrWhiteSpace(word))
+                        System.IO.File.AppendAllText(Path.Combine(Environment.CurrentDirectory, "stop.txt"), word + ",");
+                }
+            }
+            else
+            {
+                System.IO.File.Create(Path.Combine(Environment.CurrentDirectory, "stop.txt"));
+                foreach (var word in words)
+                {
+                    if (word != "." || !string.IsNullOrWhiteSpace(word))
+                        System.IO.File.AppendAllText(Path.Combine(Environment.CurrentDirectory, "stop.txt"), word + ",");
+                }
+            }
+
+            return StopWord;
+        }
+        
 
         public async Task<List<avitoItemModel>> getFilteredListByStopWords(List<avitoItemModel> listAItem)
         {
@@ -68,13 +98,51 @@ namespace avitoBot
 
             renderedText += $"\nЦена: {AIM.Price} \n";
 
-            renderedText += $"\nОписание:{AIM.Discription}\n";
+            renderedText += $"\nГород: {AIM.City} \n\n";
 
-            renderedText += $"\n<a href=\"{AIM.Link}\">ССЫЛКА</a>";
+            renderedText += $"\nОписание:{AIM.Discription}\n\n\n";
+
+            renderedText += $"\n<a href=\"{AIM.Link}\">ССЫЛКА</a>\n";
 
             return renderedText;
         }
 
-	}
+        public async Task<List<avitoItemModel>> filterByPrice(List<avitoItemModel> listAIM,int minPrice, int maxPrice)
+        {
+            if(minPrice == 0 && maxPrice == 0)
+            {
+                return listAIM;
+            }
+            
+            return listAIM.Where(x => Convert.ToInt32(x.Price.Remove(x.Price.Length - 1).Replace("\u00A0", "").Trim()) >= minPrice && maxPrice >= Convert.ToInt32(x.Price.Remove(x.Price.Length - 1).Replace("\u00A0", "").Trim())).ToList();
+        }
+
+        public static async Task setPages(Message message, TelegramBotClient bot, string preText = "default")
+        {
+            var inlineKeyboard = new InlineKeyboardMarkup(new[]
+            {
+                
+                    // first row
+                    new []
+                    {
+                        InlineKeyboardButton.WithSwitchInlineQueryCurrentChat("Ввести кол-во страниц","!Pages: 10"),
+
+                    },
+                    
+              });
+
+            var text = "Вы выбрали парсинг страниц. Напишите какое кол-во страниц вы хотите проверить. \nДля этого выберите пункт из меню чата\n";
+            text += "(Максимальное кол-во стр на сайте 100)";
+
+            await bot.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                preText == "default" ? text : preText,
+                replyMarkup: inlineKeyboard
+
+            );
+
+        }
+
+    }
 }
 
