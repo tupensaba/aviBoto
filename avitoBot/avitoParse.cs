@@ -14,13 +14,13 @@ namespace avitoBot
 		}
 
 
-		public async Task<List<avitoItemModel>> getListOfItems()
+		public async Task<List<avitoItemModel>> getListOfItems(int page)
 		{
 			List<avitoItemModel> listItems = new List<avitoItemModel>();
 
             AvitoClient client = new AvitoClient();
 
-			var html = await client.getHtmlofItems();
+			var html = await client.getHtmlofItems(page);
 
 			HtmlDocument htmlSnippet = new HtmlDocument();
 			htmlSnippet.LoadHtml(html);

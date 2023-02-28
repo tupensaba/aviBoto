@@ -11,6 +11,12 @@ namespace avitoBot
 
         public static string BotName { get; set; } = "";
 
+        public static List<long> noRepeatList { get; set; } = new List<long>();
+
+        public static string Status { get; set; } = "Выключен";
+
+        public static int Count { get; set; } = 100;
+
         public static async Task Main()
         {
             if (Configuration.BotToken != "")
@@ -31,17 +37,13 @@ namespace avitoBot
                 bot.StartReceiving(Array.Empty<UpdateType>());
                 Console.WriteLine($"Start listening for @{me.Username},{me.Id.ToString()}");
 
-                avitoParse avitoParse = new avitoParse();
-
-                await avitoParse.getListOfItems();
-
                 Console.ReadLine();
                 bot.StopReceiving();
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Не удается подключиться к боту, проверьте файл keybot.txt на наличия api ключа");
+                Console.WriteLine("Не удается подключиться к боту, проверьте файл keybot.txt на наличие api ключа");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.ReadLine();
             }
@@ -50,10 +52,70 @@ namespace avitoBot
 
         private static async void BotOnMessageResultRecieved(object sender, MessageEventArgs message)
         {
+            switch(message.Message.Text)
+            {
+                case "/Включить":
 
+                    Status = "Включен";
 
+                    while (Status == "Включен")
+                    {
+                        if (Count >= 1)
+                        {
+                            ThreadStart ts = new ThreadStart(async () =>
+                            {
 
+                                avitoParse avitoParse = new avitoParse();
 
+                                var listItems = await avitoParse.getListOfItems(page: Count--);
+
+                                FilterUtils fu = new FilterUtils();
+
+                                var goodItem = await fu.getFilteredListByStopWords(listItems);
+
+                                if (noRepeatList != null && noRepeatList.Any())
+                                    goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
+
+                                foreach (var good in goodItem)
+                                {
+                                    if (noRepeatList == null || !noRepeatList.Contains(good.Id))
+                                        noRepeatList.Add(good.Id);
+
+                                    await bot.SendPhotoAsync(message.Message.Chat.Id, photo: good.ImgLink, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                }
+
+                            });
+                            Thread thread = new Thread(ts);
+                            thread.Start();
+
+                            Thread.Sleep(5000);
+                        }
+                        avitoParse avitoParse = new avitoParse();
+
+                        var listItems = await avitoParse.getListOfItems(1);
+
+                        FilterUtils fu = new FilterUtils();
+
+                        var goodItem = await fu.getFilteredListByStopWords(listItems);
+
+                        if (noRepeatList != null && noRepeatList.Any())
+                            goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
+
+                        foreach (var good in goodItem)
+                        {
+                            if (noRepeatList == null || !noRepeatList.Contains(good.Id))
+                                noRepeatList.Add(good.Id);
+
+                            await bot.SendPhotoAsync(message.Message.Chat.Id, photo: good.ImgLink, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                        }
+
+                    }
+
+                    break;
+            }
+           
         }
            
 
