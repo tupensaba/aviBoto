@@ -18,9 +18,13 @@ namespace avitoBot
 		{
 			List<avitoItemModel> listItems = new List<avitoItemModel>();
 
+			string html = "";
             AvitoClient client = new AvitoClient();
 
-			var html = await client.getHtmlofItems(page);
+			while (html == "")
+			{
+				html = await client.getHtmlofItems(page);
+			}
 
 			HtmlDocument htmlSnippet = new HtmlDocument();
 			htmlSnippet.LoadHtml(html);

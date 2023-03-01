@@ -35,10 +35,18 @@ namespace avitoBot
             };
             using (var response = await client.SendAsync(request))
             {
-                response.EnsureSuccessStatusCode();
-                var body = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    response.EnsureSuccessStatusCode();
+                    var body = await response.Content.ReadAsStringAsync();
 
-                return body;
+                    return body;
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine("Bad request");
+                    return "";
+                }
             }
         }
 
