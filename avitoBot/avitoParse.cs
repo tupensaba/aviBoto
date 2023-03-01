@@ -44,11 +44,11 @@ namespace avitoBot
 					{
 						Id = long.Parse(atributes["data-item-id"].Value),
 						Title = item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").SelectSingleNode($"//h3").InnerText,
-						Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
+						//Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
 						ImgLink = item.SelectSingleNode($"//div[@class='photo-slider-item-nKXVO photo-slider-keepImageRatio-C5mWU']").SelectSingleNode($"//img").Attributes["src"].Value,
 						Price = item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText,
 						Link = avitoLink + item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").Attributes["href"].Value,
-						City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
+						//City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
 
 					};
 					listItems.Add(itemModel);
@@ -68,13 +68,13 @@ namespace avitoBot
 						{
 							Id = long.Parse(atributes["data-item-id"].Value),
 							Title = item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").SelectSingleNode($"//h3").InnerText,
-							Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
+							//Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
 							ImgLink = qq.Attributes["data-marker"].Value.Replace("slider-image/image-", ""),
 							Price =
 							item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText.ToLower().Contains('а') ?
 																"0 Р" : item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText,
 							Link = avitoLink + item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").Attributes["href"].Value,
-							City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
+							//City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
 
 
 
@@ -90,12 +90,12 @@ namespace avitoBot
 							{
 								Id = long.Parse(atributes["data-item-id"].Value),
 								Title = item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").SelectSingleNode($"//h3").InnerText,
-								Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
+								//Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
 								Price =
 								item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText.ToLower().Contains('а') ?
 																	"0 Р" : item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText,
 								Link = avitoLink + item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").Attributes["href"].Value,
-								City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
+								//City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
 
 
 

@@ -171,13 +171,25 @@ namespace avitoBot
 
                     var text = "";
 
+                    var i = 0;
+
                     foreach (var word in listofWords)
                     {
                         text += word + ",";
+                        i++;
+                        if (i > 35)
+                        {
+                            await bot.SendTextMessageAsync(message.Message.Chat.Id, text != "" ? text : "Список пустой");
+                            i = 0;
+                            text = "";
+                        }
+
                     }
 
-                    await bot.SendTextMessageAsync(message.Message.Chat.Id, text != "" ? text : "Список пустой");
-
+                    if (i < 35 && text != "")
+                    {
+                        await bot.SendTextMessageAsync(message.Message.Chat.Id, text != "" ? text : "Список пустой");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -328,14 +340,29 @@ namespace avitoBot
                 case "/stopwords":
 
                     FilterUtils fu = new FilterUtils();
-                    var text = "";
+                    var text = "Cписок:";
+
+                    var i = 0;
 
                     foreach (var word in fu.StopWord)
                     {
                         text += word + ",";
+                        i++;
+                        if(i >35)
+                        {
+                            await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text != "" ? text : "Список пустой");
+                            i = 0;
+                            text = "";
+                        }
+                        
                     }
 
-                    await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text != "" ? text:"Список пустой");
+                    if(i<35 && text != "")
+                    {
+                        await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text != "" ? text : "Список пустой");
+                    }
+                       
+                    
 
                     break;
 
@@ -406,9 +433,9 @@ namespace avitoBot
             var mainKeyboard = new ReplyKeyboardMarkup(
                 new KeyboardButton[][]
                 {
-                        new KeyboardButton[] { "/menu" },
-                        new KeyboardButton[] { "/вкл" },
-                       
+                        new KeyboardButton[] { "/menu" },                    
+                        new KeyboardButton[] { "/выкл" },
+
                 }
 
             );

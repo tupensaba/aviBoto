@@ -51,12 +51,16 @@ namespace avitoBot
             }
             else
             {
-                System.IO.File.Create(Path.Combine(Environment.CurrentDirectory, "stop.txt"));
-                foreach (var word in words)
+                using (var fileStream = System.IO.File.Create(Path.Combine(Environment.CurrentDirectory, "stop.txt")))
                 {
-                    if (word != "." || !string.IsNullOrWhiteSpace(word))
+
+                }
+                    foreach (var word in words)
+                    {
+                        if (word != "." || !string.IsNullOrWhiteSpace(word))
                         System.IO.File.AppendAllText(Path.Combine(Environment.CurrentDirectory, "stop.txt"), word + ",");
                 }
+                
             }
 
             return StopWord;
@@ -98,9 +102,11 @@ namespace avitoBot
 
             renderedText += $"\nЦена: {AIM.Price} \n";
 
+            if (AIM.City != null)
             renderedText += $"\nГород: {AIM.City} \n\n";
 
-            renderedText += $"\nОписание:{AIM.Discription}\n\n\n";
+            if (AIM.Discription != null)
+                renderedText += $"\nОписание:{AIM.Discription}\n\n\n";
 
             renderedText += $"\n<a href=\"{AIM.Link}\">ССЫЛКА</a>\n";
 
