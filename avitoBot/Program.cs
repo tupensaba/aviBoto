@@ -325,7 +325,7 @@ namespace avitoBot
                                     catch(Exception e)
                                     {
                                         Console.WriteLine("Телеграмм отклонил спам");
-                                        await Task.Delay(5000);
+                                        Thread.Sleep(10000);
 
                                         await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
 
@@ -335,7 +335,7 @@ namespace avitoBot
                             });
                             Thread thread = new Thread(ts);
                             thread.Start();
-                            await Task.Delay(3000);
+                            Thread.Sleep(5000);
 
                         }
 
