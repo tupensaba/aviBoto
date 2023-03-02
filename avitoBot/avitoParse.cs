@@ -55,15 +55,16 @@ namespace avitoBot
 				}
 				catch (Exception e)
 				{
-					HtmlDocument imgHtml = new HtmlDocument();
+                    try
+                    {
+                    HtmlDocument imgHtml = new HtmlDocument();
 					imgHtml.LoadHtml(item.SelectSingleNode($"//div[@class='photo-slider-root-Exoie photo-slider-redesign-q6DEc']").InnerHtml);
 
 					var qq = imgHtml.DocumentNode.SelectSingleNode($"//div[@class='photo-slider-photoSlider-Eyzg_ photo-slider-aspect-ratio-4-3-pARsT']")
 							.SelectSingleNode($"//ul")
 								.SelectSingleNode($"//li");
 
-					try
-					{
+					
 						var itemModel = new avitoItemModel()
 						{
 							Id = long.Parse(atributes["data-item-id"].Value),

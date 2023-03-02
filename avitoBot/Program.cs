@@ -18,6 +18,8 @@ namespace avitoBot
 
         public static string BOTstatus { get; set; } = "Выключен";
 
+        public static string mockFoto = $"https://серебро.рф/img/placeholder.png";
+
         public static int _Pages { get; set; }
 
         public static int ItemMaxPrice { get; set; } = 0;
@@ -292,7 +294,7 @@ namespace avitoBot
                                     if (noRepeatList == null || !noRepeatList.Contains(good.Id))
                                         noRepeatList.Add(good.Id);
 
-                                    await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+                                    await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink ?? mockFoto, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
 
                                 }
 
@@ -313,6 +315,7 @@ namespace avitoBot
 
                     while (BOTstatus == "Включен")
                     {
+                        
                         avitoParse avitoParse = new avitoParse();
 
                         var listItems = await avitoParse.getListOfItems(1);
@@ -331,9 +334,10 @@ namespace avitoBot
                             if (noRepeatList == null || !noRepeatList.Contains(good.Id))
                                 noRepeatList.Add(good.Id);
 
-                            await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+                            await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink ?? mockFoto, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
 
                         }
+                        Thread.Sleep(30000);
                     }
                     break;
 

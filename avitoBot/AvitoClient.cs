@@ -29,24 +29,26 @@ namespace avitoBot
                             { "Host", "www.avito.ru" },
                             { "User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15" },
                             { "Accept-Language", "ru" },
-                            { "Referer", "https://www.avito.ru/sankt_peterburg_i_lo/mebel_i_interer?f=ASgBAgICAUSKvQ280jQ&geoCoords=59.939095%2C30.315868&presentationType=serp&s=104" },
+                            { "Referer", $"https://www.avito.ru/sankt_peterburg_i_lo/mebel_i_interer?f=ASgBAgICAUSKvQ280jQ&geoCoords=59.939095%2C30.315868&presentationType=serp&s=104&p={page}" },
                             { "Connection", "keep-alive" },
                         },
             };
-            using (var response = await client.SendAsync(request))
+            try
             {
-                try
-                {
-                    response.EnsureSuccessStatusCode();
+                using (var response = await client.SendAsync(request))
+            {
+                
+                    //response.EnsureSuccessStatusCode();
                     var body = await response.Content.ReadAsStringAsync();
 
                     return body;
-                }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine("Bad request");
-                    return "";
-                }
+               
+            }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine("Bad request");
+                return "";
             }
         }
 
