@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Work\\Freelance\\aviBoto\\avitoBot\\avitoBot.csproj": {}
+    "/Users/tupensaba/Projects/avitoBot/avitoBot/avitoBot.csproj": {}
   },
   "projects": {
-    "D:\\Work\\Freelance\\aviBoto\\avitoBot\\avitoBot.csproj": {
+    "/Users/tupensaba/Projects/avitoBot/avitoBot/avitoBot.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Work\\Freelance\\aviBoto\\avitoBot\\avitoBot.csproj",
+        "projectUniqueName": "/Users/tupensaba/Projects/avitoBot/avitoBot/avitoBot.csproj",
         "projectName": "avitoBot",
-        "projectPath": "D:\\Work\\Freelance\\aviBoto\\avitoBot\\avitoBot.csproj",
-        "packagesPath": "C:\\Users\\tupensaba\\.nuget\\packages\\",
-        "outputPath": "D:\\Work\\Freelance\\aviBoto\\avitoBot\\obj\\",
+        "projectPath": "/Users/tupensaba/Projects/avitoBot/avitoBot/avitoBot.csproj",
+        "packagesPath": "/Users/tupensaba/.nuget/packages/",
+        "outputPath": "/Users/tupensaba/Projects/avitoBot/avitoBot/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\tupensaba\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/tupensaba/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -65,7 +63,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.200/RuntimeIdentifierGraph.json"
         }
       }
     }
