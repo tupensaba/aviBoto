@@ -18,7 +18,7 @@ namespace avitoBot
 
         public static string BOTstatus { get; set; } = "Выключен";
 
-        public static string mockFoto = $"https://серебро.рф/img/placeholder.png";
+        public static string mockFoto = $"";
 
         public static int _Pages { get; set; }
 
@@ -38,9 +38,16 @@ namespace avitoBot
 
 
 
-                bot.OnMessage += BotOnMessageResultRecieved;
-                bot.OnCallbackQuery += CallbackProgram;
-                bot.OnReceiveError += BotOnReceiveError;
+                try
+                {
+                    bot.OnMessage += BotOnMessageResultRecieved;
+                    bot.OnCallbackQuery += CallbackProgram;
+                    bot.OnReceiveError += BotOnReceiveError;
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("проблемв с долгим ответом на вопрос");
+                }
 
                 bot.StartReceiving(Array.Empty<UpdateType>());
                 Console.WriteLine($"Start listening for @{me.Username},{me.Id.ToString()}");
@@ -249,7 +256,15 @@ namespace avitoBot
         {
             var callbackQuery = callbackQueryEventArgs.CallbackQuery;
 
-            await bot.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            try
+            {
+                await bot.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Сообщение удалено");
+
+            }
 
 
             switch (callbackQuery.Data.ToLower())
@@ -293,15 +308,34 @@ namespace avitoBot
                                 {
                                     if (noRepeatList == null || !noRepeatList.Contains(good.Id))
                                         noRepeatList.Add(good.Id);
+                                    try
+                                    {
+                                        if (good.ImgLink != null)
+                                        {
+                                            await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
 
-                                    await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink ?? mockFoto, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+                                        }
+                                        else
+                                        {
 
+                                            await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                        }
+                                    }
+                                    catch(Exception e)
+                                    {
+                                        Console.WriteLine("Телеграмм отклонил спам");
+                                        await Task.Delay(5000);
+
+                                        await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                    }
                                 }
 
                             });
                             Thread thread = new Thread(ts);
                             thread.Start();
-                            Thread.Sleep(3000);
+                            await Task.Delay(3000);
 
                         }
 
@@ -334,10 +368,33 @@ namespace avitoBot
                             if (noRepeatList == null || !noRepeatList.Contains(good.Id))
                                 noRepeatList.Add(good.Id);
 
-                            await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink ?? mockFoto, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+                            try
+                            {
+                                if (good.ImgLink != null)
+                                {
+                                    await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                }
+                                else
+                                {
+
+                                    await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("Телеграмм отклонил спам");
+                                await Task.Delay(5000);
+
+
+                                await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                
+                            }
 
                         }
-                        Thread.Sleep(30000);
+                        await Task.Delay(30000);
                     }
                     break;
 
