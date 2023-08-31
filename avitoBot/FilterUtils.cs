@@ -16,8 +16,6 @@ namespace avitoBot
 
                     var _stop = System.IO.File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "stop.txt")).Split(',');
 
-                    Console.WriteLine(_stop);
-
                     return _stop.ToList();
 
                 }
@@ -108,7 +106,7 @@ namespace avitoBot
             if (AIM.Discription != null)
                 renderedText += $"\nОписание:{AIM.Discription}\n\n\n";
 
-            renderedText += $"\n<a href=\"{AIM.Link}\">ССЫЛКА</a>\n";
+            renderedText += $"\n{AIM.Link}";
 
             return renderedText;
         }
@@ -137,7 +135,7 @@ namespace avitoBot
                     
               });
 
-            var text = "Вы выбрали парсинг страниц. Напишите какое кол-во страниц вы хотите проверить. \nДля этого выберите пункт из меню чата\n";
+            var text = "!!Произойдет остановка другого парса!! Вы выбрали парсинг n страниц.Напишите какое кол-во страниц вы хотите проверить. \nДля этого выберите пункт из меню чата\n";
             text += "(Максимальное кол-во стр на сайте 100)";
 
             await bot.SendTextMessageAsync(

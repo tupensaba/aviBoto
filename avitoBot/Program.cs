@@ -18,7 +18,7 @@ namespace avitoBot
 
         public static string BOTstatus { get; set; } = "Выключен";
 
-        public static string mockFoto = $"";
+        public static List<long> listOfActiveChats = new List<long>();
 
         public static int _Pages { get; set; }
 
@@ -285,10 +285,10 @@ namespace avitoBot
 
                     BOTstatus = status;
 
-                    while (BOTstatus == status)
+                    while (BOTstatus == status && count <= _Pages)
                     {
-                        if ( count <= _Pages) // надо поменять для каждого свои страницы 
-                        {
+                         // надо поменять для каждого свои страницы 
+                        
                             ThreadStart ts = new ThreadStart(async () =>
                             {
                                 avitoParse avitoParse = new avitoParse();
@@ -299,7 +299,7 @@ namespace avitoBot
 
                                 var goodItem = await fu.getFilteredListByStopWords(listItems);
 
-                                goodItem = await fu.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
+                                //goodItem = await fu.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
 
                                 if (noRepeatList != null && noRepeatList.Any())
                                     goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
@@ -319,7 +319,7 @@ namespace avitoBot
                                         {
 
                                             await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
-
+                                            Console.WriteLine($"отправлено со страницы {count}: {good.Id}");
                                         }
                                     }
                                     catch(Exception e)
@@ -329,72 +329,129 @@ namespace avitoBot
 
                                         await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
 
+                                        Console.WriteLine($"(ПОСЛЕ СПАМА)отправлено со страницы {count}: {good.Id}");
+                                    }
+                                    if (count == _Pages && good.Id == goodItem.LastOrDefault().Id)
+                                    {
+                                        await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: $"Проверенно {count} стр");
                                     }
                                 }
+                               
 
                             });
                             Thread thread = new Thread(ts);
                             thread.Start();
-                            Thread.Sleep(5000);
+                            Thread.Sleep(8000);
 
-                        }
+                     }
 
-                    }
+                    
 
                     break;
 
+
                 case "/проверкановых":
-
-                    BOTstatus = "Включен";
-
-                    while (BOTstatus == "Включен")
+                    try
                     {
-                        
-                        avitoParse avitoParse = new avitoParse();
+                        Configuration.createOrAddUsersIdToFile(callbackQuery.Message.Chat.Id, callbackQuery.Message.Chat.FirstName);
 
-                        var listItems = await avitoParse.getListOfItems(1);
+                        var conf = new Configuration();
 
-                        FilterUtils filterUtils = new FilterUtils();
-
-                        var goodItem = await filterUtils.getFilteredListByStopWords(listItems);
-
-                        goodItem = await filterUtils.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
-
-                        if (noRepeatList != null && noRepeatList.Any())
-                            goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
-
-                        foreach (var good in goodItem)
+                        var timestamp = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Local);
+                        if (timestamp.Day % 5 == 0 && timestamp.Hour == 1)
                         {
-                            if (noRepeatList == null || !noRepeatList.Contains(good.Id))
-                                noRepeatList.Add(good.Id);
-
-                            try
-                            {
-                                if (good.ImgLink != null)
-                                {
-                                    await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
-
-                                }
-                                else
-                                {
-
-                                    await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
-
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine("Телеграмм отклонил спам");
-                                await Task.Delay(5000);
-
-
-                                await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
-
-                                
-                            }
+                            noRepeatList.Clear();
 
                         }
-                        await Task.Delay(30000);
+
+                        if (BOTstatus == "Включен" && listOfActiveChats.Contains(callbackQuery.Message.Chat.Id))
+                        {
+                            await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: "Бот уже парсит первую страницу");
+                            return;
+                        }
+
+                        BOTstatus = "Включен";
+
+                        listOfActiveChats.Add(callbackQuery.Message.Chat.Id);
+
+                        while (BOTstatus == "Включен")
+                        {
+
+                            avitoParse avitoParse = new avitoParse();
+
+                            var listItems = await avitoParse.getListOfItems(1);
+
+                            FilterUtils filterUtils = new FilterUtils();
+
+                            var goodItem = await filterUtils.getFilteredListByStopWords(listItems);
+
+                            //goodItem = await filterUtils.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
+
+                            if (noRepeatList != null && noRepeatList.Any())
+                                goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
+
+                            foreach (var good in goodItem)
+                            {
+                                if (noRepeatList == null || !noRepeatList.Contains(good.Id))
+                                    noRepeatList.Add(good.Id);
+
+                                int oountUsers = 0;
+
+                                foreach (var chatidAndName in conf.chats)
+                                {
+                                    var chatid = chatidAndName.Remove(chatidAndName.IndexOf('-'));
+
+                                    try
+                                    {
+                                        if (good.ImgLink != null)
+                                        {
+                                            await bot.SendPhotoAsync(chatid, photo: good.ImgLink, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                        }
+                                        else
+                                        {
+
+                                            await bot.SendTextMessageAsync(chatid, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                        }
+
+                                        oountUsers++;
+                                        Console.WriteLine($"отправлено о товаре с 1 стр: {good.Id}");
+
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Console.WriteLine("Телеграмм отклонил спам");
+                                        await Task.Delay(7000);
+
+                                        try
+                                        {
+                                            await bot.SendTextMessageAsync(chatid, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+                                            Console.WriteLine($"(После Спама)отправлено о товаре с 1 стр: {good.Id}");
+                                        }
+                                        catch 
+                                        {
+                                            Console.WriteLine(chatid + " заблокировал бота");
+                                            Console.WriteLine($"Удаляю чат {chatid}...");
+                                            var newChatsId = conf.chats;
+                                            newChatsId.RemoveAt(oountUsers);
+
+                                            conf.updateChatsId(newChatsId);
+
+                                            continue;
+                                        }
+                                    }
+                                }
+
+                            }
+                            await Task.Delay(45000);
+
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                        Console.ReadKey();
                     }
                     break;
 
@@ -430,6 +487,9 @@ namespace avitoBot
                 case "/выкл":
                 case "/off":
                     BOTstatus = "Выключен";
+
+                    if (listOfActiveChats.Contains(callbackQuery.Message.Chat.Id))
+                        listOfActiveChats.Remove(callbackQuery.Message.Chat.Id);
 
                     await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: $"Статус бота: {BOTstatus}");
 
@@ -494,13 +554,15 @@ namespace avitoBot
             var mainKeyboard = new ReplyKeyboardMarkup(
                 new KeyboardButton[][]
                 {
-                        new KeyboardButton[] { "/menu" },                    
+                        new KeyboardButton[] { "/menu" },
                         new KeyboardButton[] { "/выкл" },
+                        new KeyboardButton[] { "/статус" },
 
                 }
 
-            );
+             );
             mainKeyboard.ResizeKeyboard = true;
+            mainKeyboard.OneTimeKeyboard = true;
 
             var text = $"Привет {message.Chat.FirstName}!";
             
