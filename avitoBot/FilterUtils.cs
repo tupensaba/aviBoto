@@ -117,8 +117,13 @@ namespace avitoBot
             {
                 return listAIM;
             }
-            
+
+            if (listAIM.Count != 0 && listAIM.Select(x => x.Price).Any()) { 
+
             return listAIM.Where(x => Convert.ToInt32(x.Price.Remove(x.Price.Length - 1).Replace("\u00A0", "").Trim()) >= minPrice && maxPrice >= Convert.ToInt32(x.Price.Remove(x.Price.Length - 1).Replace("\u00A0", "").Trim())).ToList();
+            }
+
+            return listAIM;
         }
 
         public static async Task setPages(Message message, TelegramBotClient bot, string preText = "default")

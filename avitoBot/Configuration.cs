@@ -55,6 +55,30 @@ namespace avitoBot
            
         }
 
+        public static List<string> focusUrls
+        {
+            get
+            {
+                try
+                {
+
+                    var Url = System.IO.File.ReadAllLines(Path.Combine(Environment.CurrentDirectory, "url.txt"));
+
+                    return Url.ToList();
+                }
+                catch (Exception e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Не найден url.txt\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    return new List<string>();
+
+                }
+            }
+
+        }
+
+
         public static long BotChannel
         {
             get

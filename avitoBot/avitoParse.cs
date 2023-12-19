@@ -14,7 +14,7 @@ namespace avitoBot
 		}
 
 
-		public async Task<List<avitoItemModel>> getListOfItems(int page)
+		public async Task<List<avitoItemModel>> getListOfItems(int page,string url = null)
 		{
 			List<avitoItemModel> listItems = new List<avitoItemModel>();
 
@@ -23,7 +23,7 @@ namespace avitoBot
 
 			while (html == "")
 			{
-				html = await client.getHtmlofItems(page);
+				html = await client.getHtmlofItems(page,url);
 			}
 
 			HtmlDocument htmlSnippet = new HtmlDocument();

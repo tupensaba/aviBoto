@@ -262,13 +262,15 @@ namespace avitoBot
             }
             catch(Exception e)
             {
-                Console.WriteLine("Сообщение удалено");
+                Console.WriteLine("Сообщение меню и тд удалено");
 
             }
 
 
             switch (callbackQuery.Data.ToLower())
             {
+                case "/Error":
+                    throw new Exception(message: "Тестовая ошибка");
                 case "/menu":
                     await SendMenu(callbackQuery.Message, "Меню");
                     break;
@@ -299,7 +301,7 @@ namespace avitoBot
 
                                 var goodItem = await fu.getFilteredListByStopWords(listItems);
 
-                                //goodItem = await fu.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
+                                goodItem = await fu.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
 
                                 if (noRepeatList != null && noRepeatList.Any())
                                     goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
@@ -376,82 +378,88 @@ namespace avitoBot
 
                         while (BOTstatus == "Включен")
                         {
-
-                            avitoParse avitoParse = new avitoParse();
-
-                            var listItems = await avitoParse.getListOfItems(1);
-
-                            FilterUtils filterUtils = new FilterUtils();
-
-                            var goodItem = await filterUtils.getFilteredListByStopWords(listItems);
-
-                            //goodItem = await filterUtils.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
-
-                            if (noRepeatList != null && noRepeatList.Any())
-                                goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
-
-                            foreach (var good in goodItem)
+                            foreach (var sUrl in Configuration.focusUrls)
                             {
-                                if (noRepeatList == null || !noRepeatList.Contains(good.Id))
-                                    noRepeatList.Add(good.Id);
 
-                                int oountUsers = 0;
+                                avitoParse avitoParse = new avitoParse();
 
-                                foreach (var chatidAndName in conf.chats)
+                                var listItems = await avitoParse.getListOfItems(1, sUrl);
+
+                                FilterUtils filterUtils = new FilterUtils();
+
+                                var goodItem = await filterUtils.getFilteredListByStopWords(listItems);
+
+                                goodItem = await filterUtils.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
+
+                                if (noRepeatList != null && noRepeatList.Any())
+                                    goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
+
+                                foreach (var good in goodItem)
                                 {
-                                    var chatid = chatidAndName.Remove(chatidAndName.IndexOf('-'));
+                                    if (noRepeatList == null || !noRepeatList.Contains(good.Id))
+                                        noRepeatList.Add(good.Id);
 
-                                    try
+                                    int oountUsers = 0;
+
+                                    foreach (var chatidAndName in conf.chats)
                                     {
-                                        if (good.ImgLink != null)
-                                        {
-                                            await bot.SendPhotoAsync(chatid, photo: good.ImgLink, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
-
-                                        }
-                                        else
-                                        {
-
-                                            await bot.SendTextMessageAsync(chatid, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
-
-                                        }
-
-                                        oountUsers++;
-                                        Console.WriteLine($"отправлено о товаре с 1 стр: {good.Id}");
-
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Console.WriteLine("Телеграмм отклонил спам");
-                                        await Task.Delay(7000);
+                                        var chatid = chatidAndName.Remove(chatidAndName.IndexOf('-'));
 
                                         try
                                         {
-                                            await bot.SendTextMessageAsync(chatid, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
-                                            Console.WriteLine($"(После Спама)отправлено о товаре с 1 стр: {good.Id}");
+                                            if (good.ImgLink != null)
+                                            {
+                                                await bot.SendPhotoAsync(chatid, photo: good.ImgLink, caption: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                            }
+                                            else
+                                            {
+
+                                                await bot.SendTextMessageAsync(chatid, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                            }
+
+                                            oountUsers++;
+                                            Console.WriteLine($"отправлено о товаре с 1 стр: {good.Id}");
+
                                         }
-                                        catch 
+                                        catch (Exception e)
                                         {
-                                            Console.WriteLine(chatid + " заблокировал бота");
-                                            Console.WriteLine($"Удаляю чат {chatid}...");
-                                            var newChatsId = conf.chats;
-                                            newChatsId.RemoveAt(oountUsers);
+                                            Console.WriteLine("Телеграмм отклонил спам");
+                                            await Task.Delay(7000);
 
-                                            conf.updateChatsId(newChatsId);
+                                            try
+                                            {
+                                                await bot.SendTextMessageAsync(chatid, text: await filterUtils.prepareRenderText(good), parseMode: ParseMode.Html);
+                                                Console.WriteLine($"(После Спама)отправлено о товаре с 1 стр: {good.Id}");
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine(chatid + " заблокировал бота");
+                                                Console.WriteLine($"Удаляю чат {chatid}...");
+                                                var newChatsId = conf.chats;
+                                                newChatsId.RemoveAt(oountUsers);
 
-                                            continue;
+                                                conf.updateChatsId(newChatsId);
+
+                                                continue;
+                                            }
                                         }
                                     }
+
                                 }
+                                await Task.Delay(45000);
 
                             }
-                            await Task.Delay(45000);
-
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Console.WriteLine(e.ToString());
-                        Console.ReadKey();
+
+                        callbackQueryEventArgs.CallbackQuery.Data = "/проверкановых";
+
+                        CallbackProgram(sender, callbackQueryEventArgs);
                     }
                     break;
 
