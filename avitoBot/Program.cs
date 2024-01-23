@@ -293,53 +293,55 @@ namespace avitoBot
                         
                             ThreadStart ts = new ThreadStart(async () =>
                             {
-                                avitoParse avitoParse = new avitoParse();
- 
-                                var listItems = await avitoParse.getListOfItems(page: count++);
-
-                                FilterUtils fu = new FilterUtils();
-
-                                var goodItem = await fu.getFilteredListByStopWords(listItems);
-
-                                goodItem = await fu.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
-
-                                if (noRepeatList != null && noRepeatList.Any())
-                                    goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
-
-                                foreach (var good in goodItem)
+                                foreach (var sUrl in Configuration.focusUrls)
                                 {
-                                    if (noRepeatList == null || !noRepeatList.Contains(good.Id))
-                                        noRepeatList.Add(good.Id);
-                                    try
-                                    {
-                                        if (good.ImgLink != null)
-                                        {
-                                            await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+                                    avitoParse avitoParse = new avitoParse();
 
-                                        }
-                                        else
+                                    var listItems = await avitoParse.getListOfItems(page: count++,sUrl);
+
+                                    FilterUtils fu = new FilterUtils();
+
+                                    var goodItem = await fu.getFilteredListByStopWords(listItems);
+
+                                    goodItem = await fu.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
+
+                                    if (noRepeatList != null && noRepeatList.Any())
+                                        goodItem = goodItem.Where(x => !noRepeatList.Contains(x.Id)).ToList();
+
+                                    foreach (var good in goodItem)
+                                    {
+                                        if (noRepeatList == null || !noRepeatList.Contains(good.Id))
+                                            noRepeatList.Add(good.Id);
+                                        try
                                         {
+                                            if (good.ImgLink != null)
+                                            {
+                                                await bot.SendPhotoAsync(callbackQuery.Message.Chat.Id, photo: good.ImgLink, caption: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+
+                                            }
+                                            else
+                                            {
+
+                                                await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
+                                                Console.WriteLine($"отправлено со страницы {count}: {good.Id}");
+                                            }
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine("Телеграмм отклонил спам");
+                                            Thread.Sleep(10000);
 
                                             await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
-                                            Console.WriteLine($"отправлено со страницы {count}: {good.Id}");
+
+                                            Console.WriteLine($"(ПОСЛЕ СПАМА)отправлено со страницы {count}: {good.Id}");
+                                        }
+                                        if (count == _Pages && good.Id == goodItem.LastOrDefault().Id)
+                                        {
+                                            await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: $"Проверенно {count} стр");
                                         }
                                     }
-                                    catch(Exception e)
-                                    {
-                                        Console.WriteLine("Телеграмм отклонил спам");
-                                        Thread.Sleep(10000);
 
-                                        await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: await fu.prepareRenderText(good), parseMode: ParseMode.Html);
-
-                                        Console.WriteLine($"(ПОСЛЕ СПАМА)отправлено со страницы {count}: {good.Id}");
-                                    }
-                                    if (count == _Pages && good.Id == goodItem.LastOrDefault().Id)
-                                    {
-                                        await bot.SendTextMessageAsync(callbackQuery.Message.Chat.Id, text: $"Проверенно {count} стр");
-                                    }
                                 }
-                               
-
                             });
                             Thread thread = new Thread(ts);
                             thread.Start();
@@ -387,7 +389,7 @@ namespace avitoBot
 
                                 FilterUtils filterUtils = new FilterUtils();
 
-                                var goodItem = await filterUtils.getFilteredListByStopWords(listItems);
+                                var goodItem = await filterUtils.getFilteredListByStopWords(listItems.DistinctBy(x => x.Id).ToList());
 
                                 goodItem = await filterUtils.filterByPrice(goodItem, ItemMinPrice, ItemMaxPrice);
 

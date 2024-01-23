@@ -105,7 +105,28 @@ namespace avitoBot
 							}
 							catch (Exception exp)
 							{
-								Console.WriteLine("Пустое объявление");
+                                try
+                                {
+                                    var itemModel = new avitoItemModel()
+                                    {
+                                        Id = long.Parse(atributes["data-item-id"].Value),
+                                        Title = item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").SelectSingleNode($"//h3").InnerText,
+                                        //Discription = item.SelectSingleNode($"//meta").Attributes["content"].Value,
+                                        //Price =
+                                        //item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText.ToLower().Contains('а') ?
+                                        //                                    "0 Р" : item.SelectSingleNode($"//span[@class='price-text-_YGDY text-text-LurtD text-size-s-BxGpL']").InnerText,
+                                        Link = avitoLink + "/" + atributes["data-item-id"].Value, //item.SelectSingleNode($"//div[@class='iva-item-titleStep-pdebR']").SelectSingleNode($"//a").Attributes["href"].Value,
+                                                                                                  //City = item.SelectSingleNode($"//div[@class='geo-georeferences-SEtee text-text-LurtD text-size-s-BxGpL']").InnerText,
+
+
+                                    };
+                                    listItems.Add(itemModel);
+                                }
+                                catch (Exception exe)
+                                {
+                                    Console.WriteLine("Пустое объявление");
+                                }
+                                
 							}
 
 						}
